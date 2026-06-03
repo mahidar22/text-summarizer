@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarization App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- ========== HEADER ========== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>SummarizeAI</span>
+            </div>
+            <p class="tagline">Summarize Text & Documents Instantly</p>
+        </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-container">
+
+        <!-- ========== INPUT SECTION ========== -->
+        <section class="input-section">
+            <h2 class="section-title">
+                <i class="fas fa-file-alt"></i> Input
+            </h2>
+
+            <!-- TAB SWITCHER -->
+            <div class="tab-switcher">
+                <button class="tab-btn active" id="textTabBtn" onclick="switchTab('text')">
+                    <i class="fas fa-keyboard"></i> Type / Paste Text
+                </button>
+                <button class="tab-btn" id="fileTabBtn" onclick="switchTab('file')">
+                    <i class="fas fa-upload"></i> Upload File
+                </button>
+            </div>
+
+            <!-- TEXT INPUT TAB -->
+            <div class="tab-content active" id="textTab">
+                <textarea
+                    id="inputText"
+                    class="text-input"
+                    placeholder="Type or paste your text here to summarize..."
+                    rows="10"
+                ></textarea>
+                <div class="text-stats">
+                    <span id="wordCount">0 words</span>
+                    <span id="charCount">0 characters</span>
+                </div>
+            </div>
+
+            <!-- FILE UPLOAD TAB -->
+            <div class="tab-content" id="fileTab">
+
+                <!-- DRAG AND DROP AREA -->
+                <div
+                    class="drop-zone"
+                    id="dropZone"
+                    ondragover="handleDragOver(event)"
+                    ondragleave="handleDragLeave(event)"
+                    ondrop="handleDrop(event)"
+                    onclick="document.getElementById('fileInput').click()"
+                >
+                    <div class="drop-zone-content">
+                        <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                        <p class="drop-title">Drag & Drop your file here</p>
+                        <p class="drop-subtitle">or click to browse</p>
+
+                        <!-- SUPPORTED FORMATS -->
+                        <div class="supported-formats">
+                            <span class="format-badge pdf">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </span>
+                            <span class="format-badge doc">
+                                <i class="fas fa-file-word"></i> DOC
+                            </span>
+                            <span class="format-badge docx">
+                                <i class="fas fa-file-word"></i> DOCX
+                            </span>
+                            <span class="format-badge excel">
+                                <i class="fas fa-file-excel"></i> XLS
+                            </span>
+                            <span class="format-badge excel">
+                                <i class="fas fa-file-excel"></i> XLSX
+                            </span>
+                            <span class="format-badge txt">
+                                <i class="fas fa-file-alt"></i> TXT
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- HIDDEN FILE INPUT -->
+                    <input
+                        type="file"
+                        id="fileInput"
+                        class="hidden-input"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+                        onchange="handleFileSelect(event)"
+                    />
+                </div>
+
+                <!-- FILE PREVIEW CARD (shown after file selected) -->
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="file-info">
+                        <div class="file-icon-wrap" id="fileIconWrap">
+                            <i class="fas fa-file" id="fileTypeIcon"></i>
+                        </div>
+                        <div class="file-details">
+                            <p class="file-name" id="fileName">filename.pdf</p>
+                            <p class="file-size" id="fileSize">0 KB</p>
+                        </div>
+                        <button class="remove-file-btn" onclick="removeFile()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <!-- END FILE UPLOAD TAB -->
+
+        </section>
+        <!-- END INPUT SECTION -->
+
+        <!-- ========== SETTINGS SECTION ========== -->
+        <section class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-sliders-h"></i> Settings
+            </h2>
+
+            <div class="settings-grid">
+
+                <!-- SUMMARIZATION METHOD -->
+                <div class="setting-card">
+                    <label class="setting-label">
+                        <i class="fas fa-cogs"></i> Summarization Method
+                    </label>
+                    <div class="method-selector">
+                        <div
+                            class="method-option active"
+                            id="extractiveOption"
+                            onclick="selectMethod('extractive')"
+                        >
+                            <i class="fas fa-scissors"></i>
+                            <span class="method-name">Extractive</span>
+                            <span class="method-desc">Picks key sentences from original text</span>
+                        </div>
+                        <div
+                            class="method-option"
+                            id="abstractiveOption"
+                            onclick="selectMethod('abstractive')"
+                        >
+                            <i class="fas fa-magic"></i>
+                            <span class="method-name">Abstractive</span>
+                            <span class="method-desc">Generates new summary using AI</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUMMARY LENGTH -->
+                <div class="setting-card">
+                    <label class="setting-label">
+                        <i class="fas fa-text-height"></i> Summary Length
+                    </label>
+                    <div class="length-selector">
+                        <button class="length-btn" onclick="selectLength('short')">Short</button>
+                        <button class="length-btn active" onclick="selectLength('medium')">Medium</button>
+                        <button class="length-btn" onclick="selectLength('long')">Long</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SUMMARIZE BUTTON -->
+            <button class="summarize-btn" id="summarizeBtn" onclick="summarize()">
+                <i class="fas fa-bolt"></i> Summarize Now
+            </button>
+
+        </section>
+        <!-- END SETTINGS SECTION -->
+
+        <!-- ========== OUTPUT SECTION ========== -->
+        <section class="output-section" id="outputSection" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-align-left"></i> Summary Result
+            </h2>
+
+            <!-- STATS BAR -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Original</span>
+                    <strong id="originalWords">0 words</strong>
+                </div>
+                <div class="stat-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-compress-alt"></i>
+                    <span>Summary</span>
+                    <strong id="summaryWords">0 words</strong>
+                </div>
+                <div class="stat-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="stat-item highlight">
+                    <i class="fas fa-percentage"></i>
+                    <span>Reduced By</span>
+                    <strong id="reductionPercent">0%</strong>
+                </div>
+            </div>
+
+            <!-- SUMMARY TEXT BOX -->
+            <div class="summary-box" id="summaryBox">
+                <p id="summaryText"></p>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="action-buttons">
+                <button class="action-btn copy-btn" onclick="copySummary()">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+                <button class="action-btn download-btn" onclick="downloadSummary()">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="action-btn clear-btn" onclick="clearAll()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+
+        </section>
+        <!-- END OUTPUT SECTION -->
+
+        <!-- ========== LOADER ========== -->
+        <div class="loader-overlay" id="loaderOverlay" style="display: none;">
+            <div class="loader-box">
+                <div class="spinner"></div>
+                <p class="loader-text">Summarizing...</p>
+                <p class="loader-subtext">This may take a few seconds</p>
+            </div>
+        </div>
+
+        <!-- ========== ERROR TOAST ========== -->
+        <div class="toast" id="toast">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="toastMessage">Something went wrong</span>
+        </div>
+
+    </main>
+    <!-- END MAIN CONTENT -->
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <p>Built with <i class="fas fa-heart"></i> using Python + Transformers + Scikit-learn</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
